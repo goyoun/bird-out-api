@@ -39,3 +39,6 @@ out/
 ### yml ###
 src/main/resources/*.yml
 src/main/resources/*.properties
+
+### apple ###
+.DS_Store
