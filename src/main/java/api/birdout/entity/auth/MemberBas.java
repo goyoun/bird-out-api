@@ -1,18 +1,14 @@
 package api.birdout.entity.auth;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
-import api.birdout.entity.community.CommunityBas;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -44,8 +40,5 @@ public class MemberBas {
   
   @Column(name = "create_date")
   private LocalDateTime createDate;
-
-  @OneToMany(mappedBy = "communityBasId", fetch = FetchType.LAZY)
-  private List<CommunityBas> communityBas;
   
 }
