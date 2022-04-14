@@ -31,10 +31,7 @@ public class CommunityBasService {
   
   public ResponseEntity<ResponseDto> getCommunityAll(String type, Pageable pageable) {
     Page<CommunityBas> communities = communityBasRepository.findByType(type, pageable);
-
-    // MemberBas mem = communities.get(0).getMemberBas();
-    // log.info("회원을 찾겠소!!! : {}", mem);
-    
+    communities.getContent().get(0).getMemberBas();
     Map<String, Object> result = new HashMap<>();
     result.put("list", communities);
     return responseService.sendData(ResponseCode.S_OK, result);
