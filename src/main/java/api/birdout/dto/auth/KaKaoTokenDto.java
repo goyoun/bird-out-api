@@ -1,4 +1,4 @@
-package api.birdout.dto;
+package api.birdout.dto.auth;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -7,7 +7,7 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-public class KaKaoRes {
+public class KaKaoTokenDto {
   
   private String token_type;
   private String access_token;
