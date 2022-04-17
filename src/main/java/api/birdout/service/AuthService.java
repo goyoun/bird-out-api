@@ -1,136 +1,200 @@
 package api.birdout.service;
 
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import api.birdout.common.consts.Const;
+import api.birdout.common.exceptionHandler.ExternalServer4xx;
+import api.birdout.common.exceptionHandler.ExternalServer5xx;
+import api.birdout.common.jwtHandler.JwtTokenProvider;
+import api.birdout.common.responseHandler.ResponseCode;
+import api.birdout.common.responseHandler.ResponseDto;
+import api.birdout.common.responseHandler.ResponseService;
+import api.birdout.dto.auth.AuthDto;
+import api.birdout.dto.auth.AuthTokenSetDto;
+import api.birdout.dto.auth.KaKaoTokenDto;
 import api.birdout.dto.auth.KaKaoUserInfoDto;
+import api.birdout.dto.auth.MemberInfo;
 import api.birdout.entity.auth.MemberBas;
 import api.birdout.repository.auth.MemberBasRepository;
+import api.birdout.utils.RandomUtil;
 import api.birdout.vo.auth.JoinVo;
+import api.birdout.vo.auth.ReGenerateTokenVo;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @Service
 @Slf4j
 public class AuthService {
   
   private final MemberBasRepository memberBasRepository;
+  private final RandomUtil randomUtil;
+  private final JwtTokenProvider jwtTokenProvider;
+  private final ResponseService responseService;
 
   @Autowired
-  public AuthService(MemberBasRepository memberBasRepository) {
+  public AuthService(
+    MemberBasRepository memberBasRepository
+    , RandomUtil randomUtil
+    , JwtTokenProvider jwtTokenProvider
+    , ResponseService responseService
+  ) {
     this.memberBasRepository = memberBasRepository;
+    this.randomUtil = randomUtil;
+    this.jwtTokenProvider = jwtTokenProvider;
+    this.responseService = responseService;
   }
 
-  public void join(JoinVo joinVo) {
-    /**
-     * 함수 뽑아낼것
-     * 1. 토큰 발급 받기
-     * 2. 사용자 정보 조회
-     * 3. 로그인, 회원가입
-     */
-    // MemberBas member = memberBasRepository.findByEmail(userInfo.getKakao_account().getEmail());
+  public ResponseEntity<ResponseDto> join(JoinVo joinVo) {
+    KaKaoTokenDto kakaoToken = this.requestTokenToKakao(joinVo.getCode(), joinVo);
+    KaKaoUserInfoDto userInfo = this.requestUserInfoToKakao(kakaoToken);
+    if(userInfo.getKakao_account().getEmail() == null) return responseService.send(ResponseCode.F_KAKAO_EMAIL);
 
-    // KaKaoTokenDto kakaoToken = this.requestTokenToKakao();
-    this.requestTokenToKakao();
-    KaKaoUserInfoDto userInfo = this.requestUserInfoToKakao();
-    MembrBas birdOutMember = userInfo.findBirdOutMemberByEmail();
+    MemberBas birdOutMember = memberBasRepository.findByEmail(userInfo.getKakao_account().getEmail());
+    AuthTokenSetDto tokenSet = jwtTokenProvider.createAuthTokenSet(userInfo.getKakao_account().getEmail()); 
 
     if(birdOutMember == null) {
-      this.signUp();
-      /**
-       * 1. 랜덤숫자 발행(닉네임)
-       * 1. 토큰 생성
-       * 2. 토큰 업데이트(카카오 사진, 닉네임)
-       * 3. 토큰 리턴
-       */
+      this.signUp(tokenSet, userInfo);
     }else{
-      this.signIn();
-      /**
-       * 1. status가 0인경우만
-       * 1. 토근생성
-       * 2. 토큰 업데이트(카카오 사진)
-       * 3. 토큰 리턴
-       */
+      // true: 로그인 가능, false: 로그인 불가능
+      boolean isNormal = birdOutMember.isNormalMember();
+      if(!isNormal) return responseService.send(ResponseCode.F_MEMBER_STATUS);
+      this.signIn(tokenSet, birdOutMember);
     }
 
-    
-    /**
-     * 1. 이메일로 auth에 있는지 조회
-     * 2. 있다면 access-token, refresh-token생성해서 발급 + 데이터 업데이트
-     * 3. 없다면 토큰이랑 이메일을 db에 저장하기(닉네임 숫자 랜덤으로 넣기)
-     * 4. 이미지가 문젠데. 처음 회원
-     * 5. 결국엔 accecc token, refresh token 발급
-     */
+    Map<String, Object> result = new HashMap<>();
+    result.put("tokens", tokenSet);
+    return responseService.sendData(ResponseCode.S_OK, result);
   }
 
-  private void requestTokenToKakao() {
+  public ResponseEntity<ResponseDto> reGenerateAccessToken(ReGenerateTokenVo reGenerateTokenVo) {
+    boolean isValid = jwtTokenProvider.validateToken(reGenerateTokenVo.getRefreshToken());
+    if(!isValid) return responseService.send(ResponseCode.F_VALID);
 
+    String email = jwtTokenProvider.parsingToken(reGenerateTokenVo.getRefreshToken());
+    MemberBas memberBasData = memberBasRepository.findByEmailAndRefreshToken(email, reGenerateTokenVo.getRefreshToken());
+    if(memberBasData == null) return responseService.send(ResponseCode.F_VALID);
 
-    // application/x-www-form-urlencoded;charset=utf-8
-    // kauth.kakao.com/oauth/token
-    /**
-     * 필수값
-     * grant_type	String	authorization_code로 고정	O
-     * client_id	String	앱 REST API 키
-     * redirect_uri	String	인가 코드가 리다이렉트된 URI	O
-     * code	String	인가 코드 받기 요청으로 얻은 인가 코드	O
-     */
+    String accesssToken = jwtTokenProvider.createAccessToken(email);
+    memberBasData.updateAccessToken(accesssToken);
+    memberBasRepository.save(memberBasData);
 
-    // log.info("joinVo : {}", joinVo);
-    // MultiValueMap<String, String> req = new LinkedMultiValueMap<>();
-    // req.add("grant_type", "authorization_code");
-    // req.add("client_id", joinVo.getClient_id());
-    // req.add("redirect_uri", joinVo.getRedirect_uri());
-    // req.add("code", joinVo.getCode());
-
-    // KaKaoTokenDto join = WebClient.builder()
-    // .baseUrl("https://kauth.kakao.com/oauth/token")
-    // .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    // .build()
-    // .post()
-    // .body(BodyInserters.fromFormData(req))
-    // .retrieve()
-    // .bodyToMono(KaKaoRes.class)
-    // .doOnSuccess(res -> {
-    //   log.info("res : {}", res);               
-    // })
-    // .onErrorMap(e -> {
-    //   log.info("e : {}", e.toString()); 
-    //   log.info("e : {}", e.getLocalizedMessage()); 
-    //   log.info("e : {}", e.getMessage()); 
-    //   return e;}
-    // )
-    // .log()
-    // .block();
+    Map<String, Object> result = new HashMap<>();
+    result.put("token", accesssToken);
+    return responseService.sendData(ResponseCode.S_OK, result);
   }
 
-  private KaKaoUserInfoDto requestUserInfoToKakao() {
-    // TODO: test 해보기
-  return WebClient.builder()
-  .baseUrl("https://kapi.kakao.com")
-  //  .defaultHeader("Authorization", "Bearer" + " " + join.getAccess_token())
-  .defaultHeader("Authorization", "Bearer" + " " + "cTtpeiMJe47SCRsU_mW7wlG-4QgrHYxZKpmcRQopyWAAAAGAKzMXBA")
-  .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-  .build()
-  .post()         
-  .uri("/v2/user/me")
-  .retrieve()
-  .bodyToMono(KaKaoUserInfoDto.class)
-  .doOnSuccess(res1 -> {
-    log.info("res1 : {}", res1);
-  })
-  .block();
+  public ResponseEntity<ResponseDto> signOut(AuthDto auth) {
+    MemberBas memberData = memberBasRepository.findByEmail(auth.getEmail());
+    if(memberData == null) return responseService.send(ResponseCode.F_NOT_FOUND_MEMBER);
+    memberData.signOut();
+    memberBasRepository.save(memberData);
+    return responseService.send(ResponseCode.S_OK);
   }
 
-  private void signIn() {
+  public ResponseEntity<ResponseDto> getInformation(AuthDto auth) {
+    MemberBas memberData = memberBasRepository.findByEmail(auth.getEmail());
+    // TODO: null체크
+    // TODO: 객체 컨버트유틸 만들기
+    // TODO: 이미지 타입 핸들링 필요
+    log.info("memberData!!!! : {}", memberData);
+    MemberInfo member = new MemberInfo();
+    member.setImage(memberData.getImage());
+    member.setNickName(memberData.getNickName());
 
+    Map<String, Object> result = new HashMap<>();
+    result.put("info", member);
+    return responseService.sendData(ResponseCode.S_OK, result);
   }
 
-  private void signUp() {
-    
+  /**
+   * Private Area
+   */
+  
+  private KaKaoTokenDto requestTokenToKakao(String code, JoinVo joinVo) {
+    MultiValueMap<String, String> reqData = new LinkedMultiValueMap<>();
+    reqData.add(Const.KAKAO_GRANT_TYPE_KEY.val, Const.KAKAO_GRANT_TYPE_VALUE.val);
+    reqData.add(Const.KAKAO_CODE_KEY.val, code);
+    // FIXME: 테스트 끝난경우 client_id, redirect_uri은 환경변수로 처리하기
+    reqData.add(Const.KAKAO_CLIENT_ID_KEY.val, joinVo.getClient_id());
+    reqData.add(Const.KAKAO_REDIRECT_KEY.val, joinVo.getRedirect_uri());
+
+    return WebClient.builder()
+                    .baseUrl(Const.KAKAO_TOKNE_BASE_URL.val)
+                    .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                    .build()
+                    .post()
+                    .uri(Const.KAKAO_TOKEN_URL.val)
+                    .body(BodyInserters.fromFormData(reqData))
+                    .retrieve()
+                    .onStatus(HttpStatus::is4xxClientError, err -> Mono.error(new ExternalServer4xx(ResponseCode.F_KAKAO_4XX.toString())))
+                    .onStatus(HttpStatus::is5xxServerError, err -> Mono.error(new ExternalServer5xx(ResponseCode.F_KAKAO_5XX.toString())))
+                    .bodyToMono(KaKaoTokenDto.class)
+                    .log()
+                    .block();
+  }
+
+  private KaKaoUserInfoDto requestUserInfoToKakao(KaKaoTokenDto token) {
+    String reqTokenSet = token.getToken_type() + " " + token.getAccess_token();
+    return WebClient.builder()
+                    .baseUrl(Const.KAKAO_INFO_BASE_URL.val)
+                    .defaultHeader(Const.KAKAO_AUTH_KEY.val, reqTokenSet)
+                    .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                    .build()
+                    .post()        
+                    .uri(Const.KAKAO_INFO_URL.val)
+                    .retrieve()
+                    .onStatus(HttpStatus::is4xxClientError, err -> Mono.error(new ExternalServer4xx(ResponseCode.F_KAKAO_4XX.toString())))
+                    .onStatus(HttpStatus::is5xxServerError, err -> Mono.error(new ExternalServer5xx(ResponseCode.F_KAKAO_5XX.toString())))
+                    .bodyToMono(KaKaoUserInfoDto.class)
+                    .log()
+                    .block();
+  }
+
+  private void signIn(AuthTokenSetDto tokenSet, MemberBas birdOutMember) {
+    birdOutMember.updateTokenSet(tokenSet);
+    memberBasRepository.save(birdOutMember);
+  }
+
+  private void signUp(AuthTokenSetDto tokenSet, KaKaoUserInfoDto kakaoInfo) {
+    String nickName = this.createNickName();
+    MemberBas newMember = MemberBas.builder()
+                                   .nickName(nickName)
+                                   .role(Const.ROLE_USER.val)
+                                   .emial(kakaoInfo.getKakao_account().getEmail())
+                                   .status(Const.ZERO.val)
+                                   .accessToken(tokenSet.getAccessToken())
+                                   .refreshToken(tokenSet.getRefreshToken())
+                                   .image(kakaoInfo.getKakao_account().getProfile().getProfile_image_url())
+                                   .imageType(Const.KAKAO.val)
+                                   .signupDate(LocalDateTime.now())
+                                   .build();
+    memberBasRepository.save(newMember);
+  }
+
+  private String createNickName() {
+    boolean isDuplicationCheck = true;
+    String nickName = null;
+
+    while(isDuplicationCheck) {
+      nickName = randomUtil.generateAlphanumericString(18);
+      MemberBas duplicationNickName = memberBasRepository.findByNickName(nickName);
+      if(duplicationNickName == null) break;
+    }
+    return nickName;
   }
 
 }

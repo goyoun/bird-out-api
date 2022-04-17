@@ -16,7 +16,9 @@ public class Verify {
   public static final String F_LOGINID = "V7-LoginId Pattern Fail";
   public static final String MAX_SIZE = "V8-Max Size Excess";
 
-  // validation rule
+  /**
+   * validation rule
+   */
   public static final String ONLY_NUM_REG = "^[0-9]*$";
   // 최소8자+최소 한개 문자+최소 한개 숫자+최소 한개 특수 문자
   public static final String PASSWORD_REG = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[$@$!%*#?&])[A-Za-z\\d$@$!%*#?&]{8,}$";

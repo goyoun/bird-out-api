@@ -18,7 +18,7 @@ public class JoinVo {
   private String code;
 
   // 임시
-  @ApiModelProperty(value = "카카오 Rest Api 코드(임시값)", example = "aa020099-ekAfkeiiif0000", required = true)
+  @ApiModelProperty(value = "카카오 Rest Api Key값(임시값)", example = "aa020099-ekAfkeiiif0000", required = true)
   private String client_id;
   @ApiModelProperty(value = "카카오 리다이렉트 주소(임시값)", example = "http://localhost:8080", required = true)
   private String redirect_uri;

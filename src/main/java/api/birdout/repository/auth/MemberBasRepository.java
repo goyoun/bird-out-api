@@ -8,5 +8,7 @@ public interface MemberBasRepository extends JpaRepository<MemberBas, Integer> {
   
   public MemberBas findByMemberBasId(String id);
   public MemberBas findByEmail(String email);
+  public MemberBas findByNickName(String nickName);
+  public MemberBas findByEmailAndRefreshToken(String email, String refreshToken);
   
 }

@@ -1,7 +1,5 @@
 package api.birdout.config.security;
 
-import java.util.Arrays;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,20 +18,20 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-  // private final SecurityTokenFilter securityTokenFilter;
-  // private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
-  // private final CustomAccessDeniedHandler customAccessDeniedHandler;
+  private final SecurityTokenFilter securityTokenFilter;
+  private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+  private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-  // @Autowired
-  // public SecurityConfig(
-  //   SecurityTokenFilter securityTokenFilter
-  //   , CustomAuthenticationEntryPoint customAuthenticationEntryPoint
-  //   , CustomAccessDeniedHandler customAccessDeniedHandler
-  // ) {
-  //   this.securityTokenFilter = securityTokenFilter;
-  //   this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
-  //   this.customAccessDeniedHandler = customAccessDeniedHandler;
-  // }
+  @Autowired
+  public SecurityConfig(
+    SecurityTokenFilter securityTokenFilter
+    , CustomAuthenticationEntryPoint customAuthenticationEntryPoint
+    , CustomAccessDeniedHandler customAccessDeniedHandler
+  ) {
+    this.securityTokenFilter = securityTokenFilter;
+    this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+    this.customAccessDeniedHandler = customAccessDeniedHandler;
+  }
   
   @Bean
   public PasswordEncoder passwordEncoder() {
@@ -53,17 +51,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
       .and()
         .authorizeRequests()
-        .antMatchers(SecurityEndPoint.permitAllPoints).permitAll()
+        .antMatchers(SecurityEndPoint.authenticatEndPoints).authenticated()
+        .antMatchers("/**").permitAll()
+        // .antMatchers(SecurityEndPoint.permitAllPoints).permitAll()
         // .antMatchers().hasRole("ADMIN")
-        .anyRequest().authenticated()
+        // .anyRequest().authenticated()
 
-      // .and()
-      //   .exceptionHandling()
-      //     .accessDeniedHandler(customAccessDeniedHandler)
-      //     .authenticationEntryPoint(customAuthenticationEntryPoint)
+      .and()
+        .exceptionHandling()
+          .accessDeniedHandler(customAccessDeniedHandler)
+          .authenticationEntryPoint(customAuthenticationEntryPoint)
 
-      // .and()
-      //   .addFilterBefore(securityTokenFilter, UsernamePasswordAuthenticationFilter.class)
+      .and()
+        .addFilterBefore(securityTokenFilter, UsernamePasswordAuthenticationFilter.class)
       ;
   }
 
