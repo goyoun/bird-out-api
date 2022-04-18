@@ -27,7 +27,7 @@ import api.birdout.dto.auth.AuthDto;
 import api.birdout.dto.auth.AuthTokenSetDto;
 import api.birdout.dto.auth.KaKaoTokenDto;
 import api.birdout.dto.auth.KaKaoUserInfoDto;
-import api.birdout.dto.auth.MemberInfo;
+import api.birdout.dto.auth.MemberInfoDto;
 import api.birdout.entity.auth.MemberBas;
 import api.birdout.repository.auth.MemberBasRepository;
 import api.birdout.utils.RandomUtil;
@@ -81,9 +81,11 @@ public class AuthService {
   }
 
   public ResponseEntity<ResponseDto> reGenerateAccessToken(ReGenerateTokenVo reGenerateTokenVo) {
+    // refresh token valid check
     boolean isValid = jwtTokenProvider.validateToken(reGenerateTokenVo.getRefreshToken());
     if(!isValid) return responseService.send(ResponseCode.F_VALID);
 
+    // refresh token check
     String email = jwtTokenProvider.parsingToken(reGenerateTokenVo.getRefreshToken());
     MemberBas memberBasData = memberBasRepository.findByEmailAndRefreshToken(email, reGenerateTokenVo.getRefreshToken());
     if(memberBasData == null) return responseService.send(ResponseCode.F_VALID);
@@ -107,16 +109,15 @@ public class AuthService {
 
   public ResponseEntity<ResponseDto> getInformation(AuthDto auth) {
     MemberBas memberData = memberBasRepository.findByEmail(auth.getEmail());
-    // TODO: null체크
-    // TODO: 객체 컨버트유틸 만들기
-    // TODO: 이미지 타입 핸들링 필요
-    log.info("memberData!!!! : {}", memberData);
-    MemberInfo member = new MemberInfo();
-    member.setImage(memberData.getImage());
-    member.setNickName(memberData.getNickName());
+    if(memberData == null) return responseService.send(ResponseCode.F_NOT_FOUND_MEMBER);
+    MemberInfoDto info = MemberInfoDto.builder()
+                                      .nickName(memberData.getNickName())
+                                      .imageType(memberData.getImageType())
+                                      .build();
+    info.setImageUrl();
 
     Map<String, Object> result = new HashMap<>();
-    result.put("info", member);
+    result.put("info", info);
     return responseService.sendData(ResponseCode.S_OK, result);
   }
 

@@ -52,9 +52,7 @@ public class AuthController {
       value = "로그아웃"
     , notes = "BirdOut에 로그아웃을 요청합니다.\t\n요청 시 접근토큰이 필요합니다."
   )
-  @ApiResponses({
-    @ApiResponse(responseCode = "1-7", description = "Not Found Member")
-  })
+  @ApiResponses({@ApiResponse(responseCode = "1-7", description = "Not Found Member")})
   @GetMapping("/v1/sign-out")
   public ResponseEntity<ResponseDto> signOut(@AuthInfo AuthDto auth) {
     return authService.signOut(auth);
@@ -62,26 +60,29 @@ public class AuthController {
 
   @PostMapping("/v1/re-generate/access-token")
   @ApiOperation(value = "접근토큰 재발급", notes = "갱신토큰으로 접근토큰을 재발급 받을 수 있습니다.")
-  @ApiResponses({
-    @ApiResponse(responseCode = "1-1", description = "Request Validation Fail")
-  })
+  @ApiResponses({@ApiResponse(responseCode = "1-1", description = "Request Validation Fail")})
   public ResponseEntity<ResponseDto> reCreateAccessToken(@Validated @RequestBody ReGenerateTokenVo reGenerateTokenVo) {
     return authService.reGenerateAccessToken(reGenerateTokenVo);
   }
-
+  
   @ApiOperation(
       value = "멤버 정보 조회"
     , notes = "아래의 멤버 정보를 조회 합니다.\t\n1.닉네임\t\n2.프로필 이미지"
   )
+  @ApiResponses({@ApiResponse(responseCode = "1-7", description = "Not Found Member")})
   @GetMapping("/v1/members/information")
   public ResponseEntity<ResponseDto> getInformation(@AuthInfo AuthDto auth) {
     return authService.getInformation(auth);
   }
 
-  
-  // TODO: api개발 리스트
-  /**
-   * 3. 일반멤버 정보 수정
-   */
-  
+  // TODO: 개발필요
+  @ApiOperation(
+      value = "멤버 정보 수정"
+    , notes = "아래의 멤버 정보를 수정 합니다.\t\n1.닉네임\t\n2.프로필 이미지"
+  )
+  @PostMapping("/v1/update/members/information")
+  public ResponseEntity<ResponseDto> updateInformation(@AuthInfo AuthDto auth) {
+    return authService.getInformation(auth);
+  }
+
 }
