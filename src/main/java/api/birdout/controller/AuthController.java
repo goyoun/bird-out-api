@@ -14,6 +14,7 @@ import api.birdout.config.security.AuthInfo;
 import api.birdout.dto.auth.AuthDto;
 import api.birdout.service.AuthService;
 import api.birdout.vo.auth.JoinVo;
+import api.birdout.vo.auth.MemberUpdateVo;
 import api.birdout.vo.auth.ReGenerateTokenVo;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -75,14 +76,16 @@ public class AuthController {
     return authService.getInformation(auth);
   }
 
-  // TODO: 개발필요
   @ApiOperation(
       value = "멤버 정보 수정"
-    , notes = "아래의 멤버 정보를 수정 합니다.\t\n1.닉네임\t\n2.프로필 이미지"
+    , notes = "아래의 멤버 정보를 수정 합니다.\t\n1.닉네임\t\n**프로필 이미지 수정은 Utils에 이미지 업로드 API를 이용해주세요.**"
   )
   @PostMapping("/v1/update/members/information")
-  public ResponseEntity<ResponseDto> updateInformation(@AuthInfo AuthDto auth) {
-    return authService.getInformation(auth);
+  public ResponseEntity<ResponseDto> updateInformation(
+    @AuthInfo AuthDto auth
+    , @Validated @RequestBody MemberUpdateVo memberUpdateVo
+  ) {
+    return authService.updateInformation(memberUpdateVo);
   }
 
 }

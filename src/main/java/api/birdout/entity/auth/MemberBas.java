@@ -11,6 +11,7 @@ import javax.persistence.Table;
 
 import api.birdout.common.consts.Const;
 import api.birdout.dto.auth.AuthTokenSetDto;
+import api.birdout.vo.auth.MemberUpdateVo;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -92,6 +93,10 @@ public class MemberBas {
 
   public void updateAccessToken(String accessToken) {
     this.accessToken = accessToken;
+  }
+
+  public void updateMemberInfo(MemberUpdateVo memberUpdateVo) {
+    if(memberUpdateVo.getNickName() != null && !memberUpdateVo.getNickName().isEmpty()) this.nickName = memberUpdateVo.getNickName();
   }
 
   public void signOut() {

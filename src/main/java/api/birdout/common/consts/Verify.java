@@ -15,6 +15,7 @@ public class Verify {
   public static final String F_PASSWORD = "V6-Password Pattern Fail";
   public static final String F_LOGINID = "V7-LoginId Pattern Fail";
   public static final String MAX_SIZE = "V8-Max Size Excess";
+  public static final String F_MIN_ID = "V9-ID Value Min 1";
 
   /**
    * validation rule

@@ -14,6 +14,7 @@ public enum ResponseCode {
   , F_FORBIDDEN(HttpStatus.FORBIDDEN, "1-5", "Forbidden")
   , F_UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "1-6", "UnAuthorized")
   , F_NOT_FOUND_MEMBER(HttpStatus.UNAUTHORIZED, "1-7", "Not Found Member")
+  , F_DUPL_NICK_NAME(HttpStatus.UNAUTHORIZED, "1-8", "Nick Name is Duplication")
   ;
 
   public final HttpStatus status;

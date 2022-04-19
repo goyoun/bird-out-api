@@ -32,6 +32,7 @@ import api.birdout.entity.auth.MemberBas;
 import api.birdout.repository.auth.MemberBasRepository;
 import api.birdout.utils.RandomUtil;
 import api.birdout.vo.auth.JoinVo;
+import api.birdout.vo.auth.MemberUpdateVo;
 import api.birdout.vo.auth.ReGenerateTokenVo;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -111,6 +112,7 @@ public class AuthService {
     MemberBas memberData = memberBasRepository.findByEmail(auth.getEmail());
     if(memberData == null) return responseService.send(ResponseCode.F_NOT_FOUND_MEMBER);
     MemberInfoDto info = MemberInfoDto.builder()
+                                      .memberId(memberData.getMemberBasId())
                                       .nickName(memberData.getNickName())
                                       .imageType(memberData.getImageType())
                                       .build();
@@ -119,6 +121,20 @@ public class AuthService {
     Map<String, Object> result = new HashMap<>();
     result.put("info", info);
     return responseService.sendData(ResponseCode.S_OK, result);
+  }
+
+  public ResponseEntity<ResponseDto> updateInformation(MemberUpdateVo memberUpdateVo) {
+    MemberBas memberData = memberBasRepository.findByMemberBasId(memberUpdateVo.getMemberId());
+
+    // FIXME: 메소드로 분리 필요할듯
+    if(memberUpdateVo.getNickName() != null && !memberUpdateVo.getNickName().isEmpty()) {
+      MemberBas nickNameInfo = memberBasRepository.findByNickName(memberUpdateVo.getNickName());
+      if(nickNameInfo != null) return responseService.send(ResponseCode.F_DUPL_NICK_NAME);
+    }
+
+    memberData.updateMemberInfo(memberUpdateVo);
+    memberBasRepository.save(memberData);
+    return responseService.send(ResponseCode.S_OK);
   }
 
   /**

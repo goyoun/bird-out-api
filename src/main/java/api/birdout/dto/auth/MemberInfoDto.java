@@ -9,6 +9,7 @@ import lombok.Getter;
 @Getter
 public class MemberInfoDto {
   
+  private int memberId;
   private String nickName;
   private String imageType;
   private String image;
@@ -16,7 +17,8 @@ public class MemberInfoDto {
   private String imagePath;
 
   @Builder
-  public MemberInfoDto(String nickName, String imageType, String image) {
+  public MemberInfoDto(int memberId, String nickName, String imageType, String image) {
+    this.memberId = memberId;
     this.nickName = nickName;
     this.imageType = imageType;
     this.image = image;
