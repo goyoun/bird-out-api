@@ -7,7 +7,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -57,6 +56,15 @@ public class ExceptionService {
   @ExceptionHandler(ExternalServer5xx.class)
   protected ResponseEntity<ResponseDto> handleExternalServer5xx(ExternalServer5xx exception) {
     return responseService.send(ResponseCode.valueOf(exception.getMessage()));
+  }
+
+  // FIXME: 리팩토링필요
+  @ExceptionHandler(NullPointerException.class)
+  protected ResponseEntity<ResponseDto> handleNullPointer(NullPointerException exception) {
+    log.info("exception : {}", exception);
+    log.info("exception.getMessage() : {}", exception.getMessage());
+    log.info("exception.fillInStackTrace() : {}", exception.fillInStackTrace());
+    return responseService.send(ResponseCode.F_SERVER_ERROR);
   }
 
 }

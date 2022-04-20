@@ -11,7 +11,9 @@ public class WebConfig implements WebMvcConfigurer {
   @Override
   public void addResourceHandlers(ResourceHandlerRegistry registry) {
     registry.addResourceHandler("/img/**")
-            .addResourceLocations("file:///" + "/Users/superpil/Documents/etc-doc/")
+            // FIXME: 동적으로
+            .addResourceLocations("file:///" + "/app/birdout/public/images/")
+            // .addResourceLocations("file:///" + "/Users/superpil/Documents/etc-doc/")
             .setCachePeriod(20)
             .resourceChain(true)
             .addResolver(new PathResourceResolver());

@@ -2,6 +2,8 @@ package api.birdout.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.UUID;
 
 import org.springframework.web.bind.annotation.ModelAttribute;
@@ -35,8 +37,8 @@ public class UtilsController {
     /**
      * 1. file size
      * 2. null check
+     * 3. file 확장자 체크
      */
-
     // get file origin name
     String originalFile = imageVo.getFile().getOriginalFilename();
     log.info("originalFile : {}", originalFile);
@@ -47,10 +49,15 @@ public class UtilsController {
     String storedFileName = UUID.randomUUID().toString().replaceAll("-", "") + originalFileExtension;
     log.info("storedFileName : {}", storedFileName);
 
-    File file = new File("/Users/superpil/Documents/etc-doc/" + storedFileName);
-    log.info("file : {}", file);
 
-    imageVo.getFile().transferTo(file);
+    // 실질적 파일 업로드 로직
+    // File file = new File("/home/ec2-user/birdout/public/images/" + storedFileName);
+    // log.info("file : {}", file);
+
+    Path path = Paths.get("/app/birdout/public/images/" + storedFileName).toAbsolutePath();
+    // Path path = Paths.get("/Users/superpil/Documents/etc-doc/" + storedFileName).toAbsolutePath();
+    log.info("path : {}", path);
+    imageVo.getFile().transferTo(path.toFile());
 
 
 
