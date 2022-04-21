@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.UUID;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,12 +27,11 @@ public class UtilsController {
 
   @ApiOperation(
       value = "이미지 업로드"
-    , notes = "동시에 진행됩니다."
+    , notes = "이미지 업로드는 Postman으로 요청 바랍니다."
   )
-  @ApiResponses({@ApiResponse(responseCode = "1-4", description = "Kakao Server Error")})
+  @ApiResponses({@ApiResponse(responseCode = "3-0", description = "Request Validation Fail")})
   @PostMapping("/v1/image")
-  // @RequestPart("file") MultipartFile file, 
-  public void upLoadImage(@ModelAttribute ImageVo imageVo) throws IllegalStateException, IOException {
+  public void upLoadImage(@Validated @ModelAttribute ImageVo imageVo) throws IllegalStateException, IOException {
     // log.info("file ====> : {}", file);
     // TODO: validation check
     /**
@@ -49,25 +49,9 @@ public class UtilsController {
     String storedFileName = UUID.randomUUID().toString().replaceAll("-", "") + originalFileExtension;
     log.info("storedFileName : {}", storedFileName);
 
-
-    // 실질적 파일 업로드 로직
-    // File file = new File("/home/ec2-user/birdout/public/images/" + storedFileName);
-    // log.info("file : {}", file);
-
     Path path = Paths.get("/app/birdout/public/images/" + storedFileName).toAbsolutePath();
-    // Path path = Paths.get("/Users/superpil/Documents/etc-doc/" + storedFileName).toAbsolutePath();
     log.info("path : {}", path);
     imageVo.getFile().transferTo(path.toFile());
-
-
-
-    // Path savePath = Paths.get("/Users/superpil/Documents");
-    // log.info("savePath! : {}", savePath);
-
-    // File file = new File("/Users/superpil/Documents/etc-doc/cb5bb2df849b223781d4c4fbf8d2b2e2.jpeg");
-    // log.info("file : {}", file);
-
-    // aa.transferTo(file);
   }
 
 }

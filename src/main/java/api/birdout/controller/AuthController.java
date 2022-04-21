@@ -38,11 +38,11 @@ public class AuthController {
     , notes = "카카오 로그인으로 회원가입과 로그인을 동시에 진행됩니다."
   )
   @ApiResponses({
-      @ApiResponse(responseCode = "1-0", description = "Member Status is No Normal")
-    , @ApiResponse(responseCode = "1-1", description = "Request Validation Fail")
+      @ApiResponse(responseCode = "1-0", description = "KaKao Server not answered due to bad request")
+    , @ApiResponse(responseCode = "1-1", description = "Kakao Server Error")
     , @ApiResponse(responseCode = "1-2", description = "Need KaKao Email Data")
-    , @ApiResponse(responseCode = "1-3", description = "KaKao Server not answered due to bad request")
-    , @ApiResponse(responseCode = "1-4", description = "Kakao Server Error")
+    , @ApiResponse(responseCode = "2-2", description = "Member Status is No Normal")
+    , @ApiResponse(responseCode = "3-0", description = "Request Validation Fail")
   })
   @PostMapping("/v1/join")
   public ResponseEntity<ResponseDto> join(@Validated @RequestBody JoinVo joinVo) {
@@ -59,9 +59,9 @@ public class AuthController {
     return authService.signOut(auth);
   }
 
-  @PostMapping("/v1/re-generate/access-token")
   @ApiOperation(value = "접근토큰 재발급", notes = "갱신토큰으로 접근토큰을 재발급 받을 수 있습니다.")
-  @ApiResponses({@ApiResponse(responseCode = "1-1", description = "Request Validation Fail")})
+  @ApiResponses({@ApiResponse(responseCode = "3-0", description = "Request Validation Fail")})
+  @PostMapping("/v1/re-generate/access-token")
   public ResponseEntity<ResponseDto> reCreateAccessToken(@Validated @RequestBody ReGenerateTokenVo reGenerateTokenVo) {
     return authService.reGenerateAccessToken(reGenerateTokenVo);
   }
@@ -70,7 +70,7 @@ public class AuthController {
       value = "멤버 정보 조회"
     , notes = "아래의 멤버 정보를 조회 합니다.\t\n1.닉네임\t\n2.프로필 이미지"
   )
-  @ApiResponses({@ApiResponse(responseCode = "1-7", description = "Not Found Member")})
+  @ApiResponses({@ApiResponse(responseCode = "2-3", description = "Not Found Member")})
   @GetMapping("/v1/members/information")
   public ResponseEntity<ResponseDto> getInformation(@AuthInfo AuthDto auth) {
     return authService.getInformation(auth);
@@ -80,6 +80,7 @@ public class AuthController {
       value = "멤버 정보 수정"
     , notes = "아래의 멤버 정보를 수정 합니다.\t\n1.닉네임\t\n**프로필 이미지 수정은 Utils에 이미지 업로드 API를 이용해주세요.**"
   )
+  @ApiResponses({@ApiResponse(responseCode = "2-3", description = "Not Found Member")})
   @PostMapping("/v1/update/members/information")
   public ResponseEntity<ResponseDto> updateInformation(
     @AuthInfo AuthDto auth
