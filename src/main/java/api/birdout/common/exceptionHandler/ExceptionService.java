@@ -12,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import api.birdout.common.responseHandler.ErrorDto;
 import api.birdout.common.responseHandler.ResponseCode;
@@ -28,7 +29,7 @@ public class ExceptionService {
   
   // validation check excepiton
   @ExceptionHandler(BindException.class)
-  protected ResponseEntity<ResponseDto> handleClientRequestValidException(BindException exception) {
+  protected ResponseEntity<ResponseDto> handleClientRequestValid(BindException exception) {
     BindingResult bindResult = exception.getBindingResult();
     List<FieldError> baindResultList = bindResult.getFieldErrors();
 
@@ -61,10 +62,12 @@ public class ExceptionService {
   // FIXME: 리팩토링필요
   @ExceptionHandler(NullPointerException.class)
   protected ResponseEntity<ResponseDto> handleNullPointer(NullPointerException exception) {
-    log.info("exception : {}", exception);
-    log.info("exception.getMessage() : {}", exception.getMessage());
-    log.info("exception.fillInStackTrace() : {}", exception.fillInStackTrace());
     return responseService.send(ResponseCode.F_SERVER_ERROR);
+  }
+
+  @ExceptionHandler(MaxUploadSizeExceededException.class)
+  protected ResponseEntity<ResponseDto> handleFileUpdateMax(MaxUploadSizeExceededException exception) {
+    return responseService.send(ResponseCode.F_IMAGE_SIZE_MAX);
   }
 
 }

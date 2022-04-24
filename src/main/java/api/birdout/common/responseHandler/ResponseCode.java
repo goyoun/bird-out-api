@@ -17,6 +17,9 @@ public enum ResponseCode {
   , F_DUPL_NICK_NAME(HttpStatus.UNAUTHORIZED, "2-4", "Nick Name is Duplication")
 
   , F_VALID(HttpStatus.BAD_REQUEST, "3-0", "Request Validation Fail")
+  , F_EMPTY_VALID(HttpStatus.BAD_REQUEST, "3-1", "Empty Value")
+  , F_IMAGE_SIZE_MAX(HttpStatus.BAD_REQUEST, "3-2", "Image Data Size Exceeded")
+  , F_FILE_TYPE(HttpStatus.BAD_REQUEST, "3-3", "File Type Fail")
   
   , F_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "5-0", "Server Error")
   ;

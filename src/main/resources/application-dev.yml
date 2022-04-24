@@ -1,0 +1,43 @@
+# 개발환경
+server:
+  port: 8080
+spring:
+  config:
+    activate:
+      on-profile: dev
+  datasource:
+    driver-class-name: org.mariadb.jdbc.Driver
+    url: jdbc:mariadb://ec2-3-36-126-116.ap-northeast-2.compute.amazonaws.com:13306/devBirdout
+    username: root 
+    password: superpil-bo!
+  servlet:
+    multipart:
+      max-file-size: 60MB
+      max-request-size: 60MB
+  jpa:
+    show-sql: true
+    hibernate:
+      format-sql: true
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+
+jwt:
+  secret-key: dev-superpil-bird-out
+  header-key: X-AUTH-T-SP
+  access-token-expiration-millisecond: 7200000
+  refresh-token-expiration-millisecond: 604900016
+
+springfox:
+  documentation:
+    enabled: true
+    swagger-ui:
+      base-url: /bird-out/api/doc
+
+custom:
+  file:
+    image-upload-path: /public/birdout/
+
+logging:
+  level:
+    org.hibernate.type: trace
