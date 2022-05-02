@@ -108,6 +108,7 @@ public class AuthService {
     return responseService.send(ResponseCode.S_OK);
   }
 
+  // TODO: 작업수정필요(프로필이미지)
   public ResponseEntity<ResponseDto> getInformation(AuthDto auth) {
     MemberBas memberData = memberBasRepository.findByEmail(auth.getEmail());
     if(memberData == null) return responseService.send(ResponseCode.F_NOT_FOUND_MEMBER);
@@ -196,7 +197,7 @@ public class AuthService {
                                    .accessToken(tokenSet.getAccessToken())
                                    .refreshToken(tokenSet.getRefreshToken())
                                    .image(kakaoInfo.getKakao_account().getProfile().getProfile_image_url())
-                                   .imageType(Const.KAKAO.val)
+                                   .imageType(Const.ONE.val)
                                    .signupDate(LocalDateTime.now())
                                    .build();
     memberBasRepository.save(newMember);

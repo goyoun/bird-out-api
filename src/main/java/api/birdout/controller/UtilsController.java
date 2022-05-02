@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import api.birdout.common.consts.ApiDoc;
 import api.birdout.common.responseHandler.ResponseCode;
 import api.birdout.common.responseHandler.ResponseDto;
 import api.birdout.common.responseHandler.ResponseService;
+import api.birdout.config.security.AuthInfo;
+import api.birdout.dto.auth.AuthDto;
 import api.birdout.service.UtilsService;
 import api.birdout.vo.utils.ImageVo;
 import io.swagger.annotations.Api;
@@ -41,20 +44,23 @@ public class UtilsController {
   }
 
   @ApiOperation(
-      value = "이미지 업로드"
-    , notes = "이미지 업로드 테스트는 Postman 사용해주세요 \t\ntype종류는 아래와 같습니다 \t\n0 : user프로필이미지 \t\n1 : 커뮤니티 이미지 \t\n**(확장자는 jpg, jpeg, png만 가능합니다.)**"
+      value = ApiDoc.T_UPLOAD_IMAGE
+    , notes = ApiDoc.N_UPLOAD_IMAGE
   )
   @ApiResponses({
-      @ApiResponse(responseCode = "3-0", description = "Request Validation Fail")
+      @ApiResponse(responseCode = "2-3", description = "Not Found Member")
+    , @ApiResponse(responseCode = "3-0", description = "Request Validation Fail")
     , @ApiResponse(responseCode = "3-1", description = "Empty Value")
     , @ApiResponse(responseCode = "3-2", description = "Image Data Size Exceeded")
     , @ApiResponse(responseCode = "3-3", description = "File Type Fail")
   })
-  @PostMapping("/v1/create/image")
-  public ResponseEntity<ResponseDto> upLoadImage(@Validated @ModelAttribute ImageVo imageVo) throws IllegalStateException, IOException {
+  @PostMapping("/v1/upload/image")
+  // TODO: security path에 권한필요에 등록
+  // TODO: 코드검증필요
+  public ResponseEntity<ResponseDto> upLoadImage(@Validated @ModelAttribute ImageVo imageVo, @AuthInfo AuthDto auth) throws IllegalStateException, IOException {
     ResponseEntity<ResponseDto> checkValid = this.validateImageFile(imageVo);
     if(checkValid != null) return checkValid;
-    return utilsService.upLoadImage(imageVo);
+    return utilsService.upLoadImage(imageVo, auth);
   }
 
   /**

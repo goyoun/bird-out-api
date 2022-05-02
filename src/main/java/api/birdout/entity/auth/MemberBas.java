@@ -29,31 +29,22 @@ public class MemberBas {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   @Column(name = "member_bas_id")
   private int memberBasId;
-
   @Column(name = "role")
   private String role;
-
   @Column(name = "access_token")
   private String accessToken;
-
   @Column(name = "refresh_token")
   private String refreshToken;
-
   @Column(name = "image_type")
   private String imageType;
-
   @Column(name = "image")
   private String image;
-
   @Column(name = "nick_name")
   private String nickName;
-
   @Column(name = "email")
   private String email;
-
   @Column(name = "status")
   private String status;
-  
   @Column(name = "signup_date")
   private LocalDateTime signupDate;
   
@@ -102,6 +93,11 @@ public class MemberBas {
   public void signOut() {
     this.accessToken = null;
     this.refreshToken = null;
+  }
+
+  public void updateImageLocal(String path) {
+    this.imageType = Const.ZERO.val;
+    this.image = path;
   }
 
 }
