@@ -37,5 +37,9 @@ out/
 .vscode/
 
 ### yml ###
-src/main/resources/*.yml
+src/main/resources/*.yaml
 src/main/resources/*.properties
+*.yaml
+
+### apple ###
+.DS_Store
