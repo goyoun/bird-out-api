@@ -30,6 +30,6 @@ public class Verify {
   // 첫글자는 반드시 영문 소문자 또는 대문자 + 영문 또는 숫자만 + 최소 3글자이상 최대 20글자 미만
   public static final String LOGINID_REG = "^[A-Za-z]{1}[A-Za-z0-9]{3,19}$";
   public static final String ONLY_Y_N_REG = "^[YN]$";
-  public static final String IMAGE_TYPE_REG = "^[01]$";
+  public static final String IMAGE_TYPE_REG = "^[012]$";
 
 }
